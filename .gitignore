@@ -37,3 +37,22 @@ CLAUDE.md
 CLAUDE.local.md
 CONTEXTO_PARA_CLAUDE.md
 docs/memoria/
+
+# Contexto e memorias locais de assistentes
+*[Cc][Ll][Aa][Uu][Dd][Ee]*
+.codex/
+.agents/
+.cursor/
+.windsurf/
+.aider*
+AGENTS*.md
+MEMORY*.md
+MEMORIA*.md
+HANDOFF*.md
+CONTEXT*.md
+CONTEXTO*.md
+memory/
+memories/
+memoria/
+memorias/
+contexto/

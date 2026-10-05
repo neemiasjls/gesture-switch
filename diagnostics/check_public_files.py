@@ -5,6 +5,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import unicodedata
 
 ROOT = Path(__file__).resolve().parents[1]
 PATTERNS = {
@@ -58,6 +59,19 @@ def inspect_text(text, secrets):
     return findings
 
 
+def assistant_artifact(name):
+    """Assistant instructions and conversation memory stay local, even when force-added."""
+    normalized = unicodedata.normalize("NFKD", name.replace("\\", "/").lower())
+    parts = normalized.encode("ascii", "ignore").decode("ascii").split("/")
+    directories = {".codex", ".agents", ".cursor", ".windsurf", "memory", "memories",
+                   "memoria", "memorias", "contexto"}
+    if any("claude" in part or part in directories or part.startswith(".aider") for part in parts):
+        return True
+    filename = parts[-1]
+    return filename.endswith(".md") and filename.startswith(
+        ("agents", "memory", "memoria", "handoff", "context", "contexto"))
+
+
 def check(staged=False):
     arguments = ("diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z") if staged else (
         "ls-files", "--cached", "--others", "--exclude-standard", "-z")
@@ -65,6 +79,8 @@ def check(staged=False):
     secrets = private_values()
     failures = []
     for name in names:
+        if assistant_artifact(name):
+            failures.append((name, 0, "contexto ou memoria de assistente deve permanecer local"))
         if name.startswith(".secrets/") or Path(name).name.startswith(".env") and Path(name).name != ".env.example":
             failures.append((name, 0, "arquivo privado incluido no Git"))
         path = ROOT / name

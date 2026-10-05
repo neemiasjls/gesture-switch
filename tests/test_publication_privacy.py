@@ -1,10 +1,24 @@
 import unittest
 import configparser
 
-from diagnostics.check_public_files import extract_private_values, inspect_text
+from diagnostics.check_public_files import assistant_artifact, extract_private_values, inspect_text
 
 
 class PublicationPrivacyTest(unittest.TestCase):
+    def test_assistant_memory_is_rejected_even_when_force_added(self):
+        for filename in (".claude/settings.json", "Claude.local.md", "docs/guia-claude.txt",
+                         "docs/memoria/historico.md", "MEMORY.md", "handoff.md",
+                         ".codex/settings.json", ".agents/skills/example.md", "AGENTS.md",
+                         "contexto/resumo.txt", "docs/memórias/nota.md"):
+            with self.subTest(filename=filename):
+                self.assertTrue(assistant_artifact(filename))
+
+    def test_application_source_and_state_cache_remain_publishable(self):
+        for filename in ("README.md", "src/main/java/local/gestureswitch/TrackedLights.java",
+                         "tests/TrackedLightsProbe.java", "diagnostics/check_public_files.py"):
+            with self.subTest(filename=filename):
+                self.assertFalse(assistant_artifact(filename))
+
     def test_known_private_value_is_detected_without_echoing_it(self):
         secret = "test-only-secret-value"
         result = inspect_text("token=" + secret, {secret})
